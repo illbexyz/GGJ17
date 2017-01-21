@@ -9,12 +9,13 @@ public class PlayerController : MonoBehaviour {
 	public int orbitingVerse;
 
 	private Vector3 prevVel;
+	private Vector3 gravityCenter;
 
 	void Start () {
 		Rigidbody body = GetComponent<Rigidbody> ();
 		Vector3 push = new Vector3 (10.0f, 0.0f, 0.0f);
 		//body.AddForce (push);
-		body.velocity = push;
+		body.velocity = transform.right * 10;
 	}
 
 	void Update(){
@@ -26,13 +27,13 @@ public class PlayerController : MonoBehaviour {
 
 			body.velocity = Vector3.zero;
 			body.isKinematic = true;
-			transform.RotateAround (Vector3.zero, verse, 100 * Time.deltaTime);
+			transform.RotateAround (gravityCenter, verse, 100 * Time.deltaTime);
 		} else if (orbitingVerse == 1) {
 			// Antiorario
 
 			body.velocity = Vector3.zero;
 			body.isKinematic = true;
-			transform.RotateAround (Vector3.zero, verse, 100 * Time.deltaTime);
+			transform.RotateAround (gravityCenter, verse, 100 * Time.deltaTime);
 		} else if (orbitingVerse == 0) {
 			body.velocity = prevVel;
 		} else {
@@ -43,16 +44,15 @@ public class PlayerController : MonoBehaviour {
 			// Debug.Log (body.velocity);
 			if (Input.GetKey (KeyCode.Space)) {
 				body.isKinematic = false;
-//				Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(body.rotation.x, body.rotation.y, body.rotation.z), Vector3.one);
-//				body.velocity = matrix.MultiplyPoint (transform.position) * 10;
-				body.velocity = (Quaternion.Euler(0, 0, -90) * transform.position) * 5;
 				orbitingVerse = 2;
+				body.velocity = transform.right * 10;
 			}
 		}
 
 	}
 
 	void OnCollisionEnter(Collision c){
+		gravityCenter = c.contacts [0].otherCollider.transform.position;
 		Vector3 fwd = GetComponent<Rigidbody> ().transform.right;
 		Vector3 point = c.contacts [0].point;
 		Vector3 pos = GetComponent<Rigidbody> ().position;
