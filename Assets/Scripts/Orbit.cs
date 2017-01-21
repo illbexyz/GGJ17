@@ -12,20 +12,32 @@ public class Orbit : MonoBehaviour {
 
 		Vector3 normal = collision.contacts[0].normal;
 		Vector3 vel = body.velocity;
+		//Debug.Log ("Collision: " + vel);
 		float angle = Vector3.Angle (vel, -normal);
 		// measure angle
-		if (angle < 90) {
-			//sinistra
-			//player.GetComponent<PlayerController>().isOrbiting = true;
-			pc.isOrbiting = true;
-			Debug.Log("sinistra");
-		} else if (angle > 90) {
-			//destra
-			Debug.Log("destra");
-			body.transform.Rotate(0,-20*Time.deltaTime,0);
+
+		Vector3 dir = Vector3.Reflect(body.transform.position, Vector3.right);
+		//Debug.Log (dir);
+
+
+		if (dir.x < -0.5) {
+			pc.orbitingVerse = -1;
+		} else if (dir.x > 0.5) {
+			pc.orbitingVerse = 1;
 		} else {
-			//crash
-			Debug.Log("boom");
+			GetComponent<SphereCollider> ().enabled = false;
+			pc.orbitingVerse = 0;
 		}
+//		Debug.Log("angolo: " + angle);
+//		if (angle < 180) {
+//			//destra
+//			pc.orbitingVerse = -1;
+//		} else if (angle > 180) {
+//			//sinistra
+//			pc.orbitingVerse = 1;
+//		} else {
+//			//crash
+//			Debug.Log("boom");
+//		}
 	}
 }
