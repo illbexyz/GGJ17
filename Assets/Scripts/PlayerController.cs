@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-	public GameObject controller;
 
 	public int orbitingVerse;
+	public bool notStarted;
+
+	private int counter = 0;
 
 	private Vector3 prevVel;
 	private Vector3 gravityCenter;
@@ -18,10 +20,9 @@ public class PlayerController : MonoBehaviour {
 
 
 	void Start () {
-		Rigidbody body = GetComponent<Rigidbody> ();
-		Vector3 push = new Vector3 (10.0f, 0.0f, 0.0f);
-		//body.AddForce (push);
-		body.velocity = transform.right * 10;
+//		Rigidbody body = GetComponent<Rigidbody> ();
+//		//body.AddForce (push);
+//		body.velocity = transform.right * 10;
 	}
 
 	private void DetectSpaceBar(Rigidbody body) {
@@ -41,6 +42,10 @@ public class PlayerController : MonoBehaviour {
 
 	void Update(){
 		Rigidbody body = GetComponent<Rigidbody> ();
+		if(notStarted){
+			InitialMove (body);
+		}
+			
 
 		Vector3 verse = new Vector3 (0.0f, 0.0f, 1.0f * orbitingVerse);
 		if (isOrbitating) {
@@ -96,5 +101,19 @@ public class PlayerController : MonoBehaviour {
 		return signed_angle;
 	}
 
+	private void InitialMove(Rigidbody body){
+		if(Input.GetKeyDown(KeyCode.UpArrow) && counter < 1){
+			transform.Rotate (0, 0, 45);
+			counter++;
+		}
+		if(Input.GetKeyDown(KeyCode.DownArrow) && counter > -1){
+			transform.Rotate (0, 0, -45);
+			counter--;
+		}
+		if(Input.GetKey(KeyCode.Space)){
+			body.velocity = transform.right * 10;
+			notStarted = false;
+		}
+	}
 
 }
