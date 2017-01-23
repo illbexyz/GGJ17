@@ -6,7 +6,7 @@ public class FuelPlanet : MonoBehaviour {
 
 	void OnCollisionEnter(Collision c) {
 		if (c.contacts [0].otherCollider.tag == "Player") {
-			GameManager.instance.energy = GameManager.MAX_ENERGY;
+			GameManager.instance.ResetEnergy ();
 		}
 	}
 

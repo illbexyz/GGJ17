@@ -5,20 +5,12 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
-<<<<<<< HEAD
-
-	public int orbitingVerse;
-	public bool notStarted;
-
-	private int counter = 0;
-=======
 	public GameObject controller;
 	public GameObject fogController;
 	public GameObject restartText;
 
 	public int orbitingVerse;
 	public bool started;
->>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 	private Vector3 prevVel;
 	private Vector3 gravityCenter;
@@ -29,18 +21,10 @@ public class PlayerController : MonoBehaviour {
 	private int counter = 0;
 	private float lastTimeCheck;
 
-<<<<<<< HEAD
-	void Start () {
-//		Rigidbody body = GetComponent<Rigidbody> ();
-//		//body.AddForce (push);
-//		body.velocity = transform.right * 10;
-	}
-=======
 	public static int CLOCKWISE = -1;
 	public static int CRASHING = 0;
 	public static int ANTICLOCKWISE = 1;
 	private const int deadAngle = 20;
->>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 	private void DetectSpaceBar(Rigidbody body) {
 		if (Input.GetKeyDown (KeyCode.Space)) {
@@ -60,25 +44,14 @@ public class PlayerController : MonoBehaviour {
 
 	void Update(){
 		Rigidbody body = GetComponent<Rigidbody> ();
-<<<<<<< HEAD
-		if(notStarted){
-			InitialMove (body);
-		}
-			
-
-=======
 		Vector3 pos = transform.position;
 		transform.position = pos;
 		if (Input.GetKeyDown(KeyCode.P)) {
 			fogController.GetComponent<FogController> ().Light ();
-			if (GameManager.instance.energy == 0) {
-				GameManager.instance.GameOver ();
-			}
 		}
 		if (!started) {
 			InitialMove (body);
 		}
->>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 		Vector3 verse = new Vector3 (0.0f, 0.0f, 1.0f * orbitingVerse);
 		if (isOrbitating) {
 			if (orbitingVerse == CLOCKWISE) {
@@ -150,6 +123,11 @@ public class PlayerController : MonoBehaviour {
 		while (Time.time < lastTimeCheck + 1) {
 			yield return null;
 		}
+		if (GameManager.instance.energy <= 0) {
+			restartText.GetComponent<Text> ().text = "GAME OVER!\nPress R to restart";
+		} else {
+			restartText.GetComponent<Text> ().text = "Press R to restart";
+		}
 		restartText.GetComponent<Text> ().enabled = true;
 	}
 
@@ -163,37 +141,20 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	private void InitialMove(Rigidbody body){
-<<<<<<< HEAD
-		if(Input.GetKeyDown(KeyCode.UpArrow) && counter < 1){
-			transform.Rotate (0, 0, 45);
-			counter++;
-		}
-		if(Input.GetKeyDown(KeyCode.DownArrow) && counter > -1){
-=======
 		if(Input.GetKeyDown(KeyCode.A) && counter < 1){
 			transform.Rotate (0, 0, 45);
 			counter++;
 		}
 		if(Input.GetKeyDown(KeyCode.D) && counter > -1){
->>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 			transform.Rotate (0, 0, -45);
 			counter--;
 		}
 		if(Input.GetKey(KeyCode.Space)){
 			body.velocity = transform.right * 10;
-<<<<<<< HEAD
-			notStarted = false;
-		}
-	}
-=======
 			started = true;
-			if (GameManager.instance.energy == 0) {
-				GameManager.instance.GameOver ();
-			}
-			GameManager.instance.energy--;
+			GameManager.instance.DecrementEnergy ();
 		}
 	}
 
->>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 }
