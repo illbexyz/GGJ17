@@ -1,35 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
+<<<<<<< HEAD
 
 	public int orbitingVerse;
 	public bool notStarted;
 
 	private int counter = 0;
+=======
+	public GameObject controller;
+	public GameObject fogController;
+	public GameObject restartText;
+
+	public int orbitingVerse;
+	public bool started;
+>>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 	private Vector3 prevVel;
 	private Vector3 gravityCenter;
 
+	private Collider lastOrbit;
+
 	private bool isOrbitating = false;
-	private const int CLOCKWISE = -1;
-	private const int CRASHING = 0;
-	private const int ANTICLOCKWISE = 1;
+	private int counter = 0;
+	private float lastTimeCheck;
 
-
+<<<<<<< HEAD
 	void Start () {
 //		Rigidbody body = GetComponent<Rigidbody> ();
 //		//body.AddForce (push);
 //		body.velocity = transform.right * 10;
 	}
+=======
+	public static int CLOCKWISE = -1;
+	public static int CRASHING = 0;
+	public static int ANTICLOCKWISE = 1;
+	private const int deadAngle = 20;
+>>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 	private void DetectSpaceBar(Rigidbody body) {
-		if (Input.GetKey (KeyCode.Space)) {
+		if (Input.GetKeyDown (KeyCode.Space)) {
 			body.isKinematic = false;
 			orbitingVerse = 2;
 			body.velocity = transform.right * 10;
+			isOrbitating = false;
 		}
 	}
 
@@ -42,11 +60,25 @@ public class PlayerController : MonoBehaviour {
 
 	void Update(){
 		Rigidbody body = GetComponent<Rigidbody> ();
+<<<<<<< HEAD
 		if(notStarted){
 			InitialMove (body);
 		}
 			
 
+=======
+		Vector3 pos = transform.position;
+		transform.position = pos;
+		if (Input.GetKeyDown(KeyCode.P)) {
+			fogController.GetComponent<FogController> ().Light ();
+			if (GameManager.instance.energy == 0) {
+				GameManager.instance.GameOver ();
+			}
+		}
+		if (!started) {
+			InitialMove (body);
+		}
+>>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 		Vector3 verse = new Vector3 (0.0f, 0.0f, 1.0f * orbitingVerse);
 		if (isOrbitating) {
 			if (orbitingVerse == CLOCKWISE) {
@@ -67,32 +99,61 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision c){
-		gravityCenter = c.contacts [0].otherCollider.transform.position;
-		Vector3 fwd = GetComponent<Rigidbody> ().transform.right;
-		Vector3 collisionPoint = c.contacts [0].point;
-		Vector3 playerCenter = GetComponent<Rigidbody> ().position;
+		Collider collider = c.contacts [0].otherCollider;
+		if (collider == lastOrbit) {
+			return;
+		}
+		if (collider.tag == "Orbit") {
+			lastOrbit = collider;
+			gravityCenter = collider.transform.position;
+			Vector3 fwd = GetComponent<Rigidbody> ().transform.right;
+//			Debug.Log ("fwd: " + fwd);
+			Vector3 collisionPoint = c.contacts [0].point;
+			Vector3 playerCenter = GetComponent<Rigidbody> ().position;
 
-		Vector3 normal = c.contacts[0].normal;
-		Vector3 vel = GetComponent<Rigidbody> ().velocity;
-		float angleFromOrbit = Vector3.Angle (vel, -normal);
+			Vector3 fromCollisionToCenter = gravityCenter - collisionPoint;
+//			Vector3 tangent = Quaternion.Euler (0, 0, 90) * fromCollisionToCenter;
 
-		Vector3 fromPlayerToCollisionPoint = collisionPoint - playerCenter;
-					
-		float signedAngle = SignedAngleBetween (fromPlayerToCollisionPoint, fwd, transform.position.normalized);
-		isOrbitating = true;
-		if (signedAngle > 0) {
-			transform.Rotate (new Vector3(0f, 0f, 1f) * (180+angleFromOrbit));
-			orbitingVerse = ANTICLOCKWISE;
-		} else if (signedAngle < 0) {
-			orbitingVerse = CLOCKWISE;
-			transform.Rotate (new Vector3(0f, 0f, -1f) * (180+angleFromOrbit));
+			Vector3 normal = c.contacts [0].normal;
+			Vector3 vel = GetComponent<Rigidbody> ().velocity;
+//			float angleFromOrbit = Vector3.Angle (tangent, fwd);
+
+			Vector3 fromPlayerToCollisionPoint = collisionPoint - playerCenter;
+
+			float signedAngle = SignedAngleBetween (fromPlayerToCollisionPoint, fwd, -fromCollisionToCenter);
+//			Debug.Log ("signedAngle: " + signedAngle);
+			isOrbitating = true;
+			if (signedAngle > deadAngle) {
+				transform.Rotate (0f, 0f, -(90 - signedAngle));
+				orbitingVerse = ANTICLOCKWISE;
+			} else if (signedAngle < -deadAngle) {
+				orbitingVerse = CLOCKWISE;
+				transform.Rotate (0f, 0f, (90 + signedAngle));
+			} else {
+				orbitingVerse = CRASHING;
+				// GameManager.instance.RestartLevel ();
+				if (collider.tag == "Orbit")
+					collider.enabled = false;
+			}
+		} else if (collider.tag == "Boundaries") {
+			lastTimeCheck = Time.time;
+			StartCoroutine(askForRestart ());
 		} else {
-			orbitingVerse = CRASHING;
+			lastTimeCheck = Time.time;
+			StartCoroutine(askForRestart ());
+
 		}
 
 	}
 
-	float SignedAngleBetween(Vector3 a, Vector3 b, Vector3 n){
+	IEnumerator askForRestart() {
+		while (Time.time < lastTimeCheck + 1) {
+			yield return null;
+		}
+		restartText.GetComponent<Text> ().enabled = true;
+	}
+
+	float SignedAngleBetween(Vector3 a, Vector3 b, Vector3 n) {
 		// angle in [0,180]
 		float angle = Vector3.Angle(a,b);
 		float sign = Mathf.Sign(Vector3.Dot(n,Vector3.Cross(a,b)));
@@ -102,18 +163,37 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	private void InitialMove(Rigidbody body){
+<<<<<<< HEAD
 		if(Input.GetKeyDown(KeyCode.UpArrow) && counter < 1){
 			transform.Rotate (0, 0, 45);
 			counter++;
 		}
 		if(Input.GetKeyDown(KeyCode.DownArrow) && counter > -1){
+=======
+		if(Input.GetKeyDown(KeyCode.A) && counter < 1){
+			transform.Rotate (0, 0, 45);
+			counter++;
+		}
+		if(Input.GetKeyDown(KeyCode.D) && counter > -1){
+>>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 			transform.Rotate (0, 0, -45);
 			counter--;
 		}
 		if(Input.GetKey(KeyCode.Space)){
 			body.velocity = transform.right * 10;
+<<<<<<< HEAD
 			notStarted = false;
 		}
 	}
+=======
+			started = true;
+			if (GameManager.instance.energy == 0) {
+				GameManager.instance.GameOver ();
+			}
+			GameManager.instance.energy--;
+		}
+	}
+
+>>>>>>> ebf3789a73650f01f1fa933348aee4ab07aa4b34
 
 }
